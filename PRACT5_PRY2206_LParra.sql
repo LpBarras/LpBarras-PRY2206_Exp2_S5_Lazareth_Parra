@@ -168,16 +168,27 @@ BEGIN
 
      
         -- LÍMITE, maneja errores en caso de que las asignaciones superen el limite, reemplaza por el valor correspondiente
-    
-        IF v_total_asig > :v_limite THEN
+    BEGIN
+              IF v_total_asig > :v_limite THEN
+              RAISE ex_limite_asignacion;
+              END IF;
+
+    EXCEPTION
+        WHEN ex_limite_asignacion THEN
             INSERT INTO errores_proceso
             VALUES (
                 sq_error.NEXTVAL,
-                'TOPE_ SUPERADO',
-                'Se reemplazo el monto total de las asignaciones calculadas de ' || v_total_asig || ' por el monto de 250000 para el run Nro ' || r.numrun_prof
+                'TOPE_SUPERADO',
+                'Se reemplazo el monto total de las asignaciones calculadas de ' ||
+                v_total_asig ||
+                ' por el monto de ' ||
+                :v_limite ||
+                ' para el run Nro ' ||
+                r.numrun_prof
             );
+
             v_total_asig := :v_limite;
-        END IF;
+    END;
 
    
         -- Tabla detalle con formato correspondiente
